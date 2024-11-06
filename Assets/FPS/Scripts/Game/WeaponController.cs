@@ -4,6 +4,16 @@ using UnityEngine;
 
 namespace Unity.FPS.Game
 {
+    /// <summary>
+    /// 크로스헤어를 그리기 위한 데이터
+    /// </summary>
+    [System.Serializable]
+    public struct CrossHairData
+    {
+        public Sprite CrossHairSprite;
+        public float CrossHairSize;
+        public Color CrossHairColor;
+    }
     public class WeaponController : MonoBehaviour
     {
         #region Variables
@@ -17,6 +27,14 @@ namespace Unity.FPS.Game
 
         private AudioSource shootAudioSource;
         public AudioClip switchWeaponSfx;
+
+        // CrossHair
+        public CrossHairData crossHairDefalut;          // 기본, 평상시
+        public CrossHairData crossHairTargetSight;      // 적을 포착했을 때, 타겟팅 되었을 때
+
+        // 조준
+        public float aimZoomRatio = 1f;                 // 조준시 줌인 설정값
+        public Vector3 aimOffset;                       // 조준시 무기 위치 조정값
         #endregion
 
         private void Awake()
