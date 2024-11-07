@@ -21,6 +21,7 @@ namespace Unity.FPS.Game
 
         // 위험 체력 경계 비율
         [SerializeField] private float criticalHealthRatio = 0.3f;      
+        
         // 무적
         public bool Invincible {  get; private set; }
         #endregion
@@ -37,6 +38,21 @@ namespace Unity.FPS.Game
             // 초기화
             CurrentHealth = maxHealth;
             Invincible = false;
+        }
+
+        // 힐
+        public void Heal(float amount)
+        {
+            float beforeHealth = CurrentHealth;
+            CurrentHealth += amount;
+            CurrentHealth = Mathf.Clamp(CurrentHealth, 0f, maxHealth);
+
+            // real Heal 구하기
+            float realHeal = CurrentHealth - beforeHealth;
+            if (realHeal > 0f)
+            {
+                OnHeal?.Invoke(realHeal);
+            }
         }
 
         // damageSource: 데미지를 주는 주체
@@ -73,20 +89,6 @@ namespace Unity.FPS.Game
 
                 // 죽음 구현..
                 OnDie?.Invoke();
-            }
-        }
-
-        public void Heal(float amount)
-        {
-            float beforeHealth = CurrentHealth;
-            CurrentHealth += amount;
-            CurrentHealth = Mathf.Clamp(CurrentHealth, 0f, maxHealth);
-
-            // real Heal 구하기
-            float realHeal = CurrentHealth - beforeHealth;
-            if(realHeal > 0f)
-            {
-                OnHeal?.Invoke(realHeal);
             }
         }
     }

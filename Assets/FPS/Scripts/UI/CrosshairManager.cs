@@ -30,7 +30,7 @@ namespace Unity.FPS.UI
         {
             // 참조
             weaponsManager = GameObject.FindObjectOfType<PlayerWeaponsManager>();
-            // 강제로 호출
+            // 액티브한 무기 크로스헤어 보이기
             OnWeaponChanged(weaponsManager.GetActiveWeapon());
 
 
@@ -63,11 +63,6 @@ namespace Unity.FPS.UI
                 crosshairImage.sprite = crosshairDefault.CrossHairSprite;
                 crosshairRectTransform.sizeDelta = crosshairCurrent.CrossHairSize * Vector2.one;
             }
-           
-            crosshairCurrent = crosshairDefault;
-            //crosshairCurrent = crosshairDefault;
-
-            crosshairImage.sprite = crosshairDefault.CrossHairSprite;
 
             crosshairImage.color = Color.Lerp(crosshairImage.color, crosshairCurrent.CrossHairColor, crosshairUpdateSharpness * Time.deltaTime);
             crosshairRectTransform.sizeDelta = Mathf.Lerp(crosshairRectTransform.sizeDelta.x, crosshairCurrent.CrossHairSize, crosshairUpdateSharpness * Time.deltaTime)
@@ -77,10 +72,11 @@ namespace Unity.FPS.UI
         // 무기가 바뀔때마다 crosshairImage를 각각의 무기 Crosshair 이미지로 바꾸기
         void OnWeaponChanged(WeaponController newWeapon)
         {
-            if(newWeapon != null)
+            if(newWeapon)
             {
                 crosshairImage.enabled = true;
                 crosshairRectTransform = crosshairImage.GetComponent<RectTransform>();
+
                 // 액티브 무기의 크로스헤어 정보 가져오기
                 crosshairDefault = newWeapon.crossHairDefalut;
                 crosshairTarget = newWeapon.crossHairTargetSight;
@@ -101,6 +97,7 @@ namespace Unity.FPS.UI
 
             }
 
+            UpdateCrosshairPointingAtEnemy(true);
         }
     }
 }

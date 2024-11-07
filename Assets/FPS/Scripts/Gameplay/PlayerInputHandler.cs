@@ -20,16 +20,20 @@ namespace Unity.FPS.Gameplay
         [Tooltip("Used to flip the horizontal input axis")]
         public bool InvertXAxis = false;
 
+        private bool fireInputWasHeld = false;
+        private bool aimInputWasHeld = false;
+
 
         void Start()
-        {   
+        {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
 
         void LateUpdate()
         {
-            
+            fireInputWasHeld = GetFireInputHeld();
+            aimInputWasHeld = GetAimInputHeld();
         }
 
         public bool CanProcessInput()
@@ -106,7 +110,7 @@ namespace Unity.FPS.Gameplay
         }
 
         public bool GetCrouchInputDown()
-        {            
+        {
             /*if (CanProcessInput())
             {
                 return Input.GetButtonDown(GameConstants.k_ButtonNameCrouch);
@@ -140,25 +144,45 @@ namespace Unity.FPS.Gameplay
         {
             if (CanProcessInput())
             {
-                if(Input.GetAxis(GameConstants.k_AxisNameNextWeapon) > 0f)
+                if (Input.GetAxis(GameConstants.k_AxisNameNextWeapon) > 0f)
                 {
                     return 1;
                 }
-                else if(Input.GetAxis(GameConstants.k_AxisNameNextWeapon) < 0f)
+                else if (Input.GetAxis(GameConstants.k_AxisNameNextWeapon) < 0f)
                 {
                     return -1;
                 }
-                else if(Input.GetAxis(GameConstants.k_MouseAxisNameScrollWheel) > 0f)
+                else if (Input.GetAxis(GameConstants.k_MouseAxisNameScrollWheel) > 0f)
+                {
+                    return -1;
+                }
+                else if (Input.GetAxis(GameConstants.k_MouseAxisNameScrollWheel) < 0f)
                 {
                     return 1;
-                }
-                else if(Input.GetAxis(GameConstants.k_MouseAxisNameScrollWheel) < 0f)
-                {
-                    return -1;
                 }
             }
 
             return 0;
+        }
+
+        // 조준 시작
+        public bool GetAimInputDown()
+        {
+            if (CanProcessInput())
+            {
+                return GetAimInputHeld() == true && aimInputWasHeld == false;
+            }
+            return false;
+        }
+
+        // 조준 끝
+        public bool GetAimInputUp()
+        {
+            if (CanProcessInput())
+            {
+                return GetAimInputHeld() == false && aimInputWasHeld == true;
+            }
+            return false;
         }
 
         // 조준 - 마우스 우클릭하는 동안
@@ -171,6 +195,38 @@ namespace Unity.FPS.Gameplay
             return false;
         }
 
-        
+        // fire 버튼 누르기
+        public bool GetFireInputDown()
+        {
+            if (CanProcessInput())
+            {
+                return GetFireInputHeld() == true && fireInputWasHeld == false;
+                //return Input.GetButtonDown(GameConstants.k_ButtonNameFire);
+            }
+            return false;
+        }
+
+        // fire 버튼 떼기
+        public bool GetFireInputUp()
+        {
+            if (CanProcessInput())
+            {
+                return GetFireInputHeld() == false && fireInputWasHeld == true;
+                //return Input.GetButtonUp(GameConstants.k_ButtonNameFire);
+            }
+            return false;
+        }
+
+        // fire 버튼 누르는 중
+        public bool GetFireInputHeld()
+        {
+            if (CanProcessInput())
+            {
+                return Input.GetButton(GameConstants.k_ButtonNameFire);
+            }
+            return false;
+        }
+
+
     }
 }

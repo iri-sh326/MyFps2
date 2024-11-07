@@ -66,6 +66,8 @@ namespace Unity.FPS.Gameplay
         public bool IsAiming {  get; private set; }                 // 무기 조준 여부
         [SerializeField] private float aimingAnimationSpeed = 10f;  // 무기 이동, FOV 연출 속도
 
+        private float weaponAimingLocalPosition;
+
         // 흔들림
         [SerializeField] private float bobFrequency = 10f;
         [SerializeField] private float bobSharpness = 10f;
@@ -76,6 +78,21 @@ namespace Unity.FPS.Gameplay
         private Vector3 lastCharacterPosition;  // 현재 프레임에서의 이동속도를 구하기 위한 변수
 
         private Vector3 weaponBobLocalPosition; // 흔들림 량 최종 계산값, 이동하지 않으면 0
+
+        // 반동
+        [SerializeField] private float recoilSharpness = 50f;       // 뒤로 밀리는 이동속도
+        [SerializeField] private float maxRecoilDistance = 0.5f;    // 반동시 뒤로 밀릴 수 있는 최대거리
+        private float recoilRepositionSharpness = 10f;              // 제자리로 돌아오는 속도
+        private Vector3 accumulateRecoil;                           // 반동시 뒤로 밀리는 양
+
+        private Vector3 weaponRecoilLocalPosition;                  // 반동시 이동한 최종 계산값, 반동후 제자리에 돌아오면 0
+
+        // 저격 모드
+        private bool isScopeOn = false;
+        [SerializeField] private float distanceOnScope = 0.05f;
+
+        public UnityAction OnScopedWeapon;                          // 저격 모드 시작시 등록된 함수 호출
+        public UnityAction OffScopedWeapon;                          // 저격 모드 종료시 등록된 함수 호출
         #endregion
 
         private void Start()
@@ -88,8 +105,15 @@ namespace Unity.FPS.Gameplay
             ActiveWeaponIndex = -1;
             weaponSwitchState = WeaponSwitchState.Down;
 
-            // 이벤트 함수 등록
+            // 액티브 무기 show 함수 등록
             OnSwitchToWeapon += OnWeaponSwitched;
+
+            // 저격 모드 함수 등록
+            OnScopedWeapon += OnScope;
+            OffScopedWeapon += OffScope;
+
+            // Fov 초기값 설정
+            SetFov(defaultFov);
 
             // 지급 받은 무기 장착
             foreach (var weapon in startingWeapons)
@@ -104,10 +128,41 @@ namespace Unity.FPS.Gameplay
             // 현재 액티브 무기
             WeaponController activeWeapon = GetActiveWeapon();
 
-            // 조준 입력값 처리
-            IsAiming = playerInputHandler.GetAimInputHeld();
+            if(weaponSwitchState == WeaponSwitchState.Up)
+            {
+                // 조준 입력값 처리
+                IsAiming = playerInputHandler.GetAimInputHeld();
 
-            if (weaponSwitchState == WeaponSwitchState.Up || weaponSwitchState == WeaponSwitchState.Down)
+                // 저격 모드 처리
+                if (activeWeapon.shootType == WeaponShootType.Sniper)
+                {
+                    if (playerInputHandler.GetAimInputDown())
+                    {
+                        // 시작
+                        isScopeOn = true;
+                        OnScopedWeapon?.Invoke();
+                    }
+                    if (playerInputHandler.GetAimInputUp())
+                    {
+                        // 종료
+                        OffScopedWeapon?.Invoke();
+                    }
+                }
+
+                // 슛 처리
+                bool isFire = activeWeapon.HandleShootInputs(
+                    playerInputHandler.GetFireInputDown(), playerInputHandler.GetFireInputHeld(), playerInputHandler.GetFireInputUp()
+                    );
+
+                if (isFire)
+                {
+                    // 반동 효과
+                    accumulateRecoil += Vector3.back * activeWeapon.recoilForce;
+                    accumulateRecoil = Vector3.ClampMagnitude(accumulateRecoil, maxRecoilDistance); // 반동때문에 총이 몸 속으로 들어가면 안 된다
+                }
+            }
+
+            if (!IsAiming && (weaponSwitchState == WeaponSwitchState.Up || weaponSwitchState == WeaponSwitchState.Down))
             {
                 int switchWeaponInput = playerInputHandler.GetSwitchWeaponInput();
                 if (switchWeaponInput != 0)
@@ -138,11 +193,27 @@ namespace Unity.FPS.Gameplay
         private void LateUpdate()
         {
             UpdateWeaponBob();
+            UpdateWeaponRecoil();
             UpdateWeaponAiming();
             UpdateWeaponSwitching();
             
             // 무기 최종 위치
-            weaponParentSocket.localPosition = weaponMainLocalPosition + weaponBobLocalPosition ;
+            weaponParentSocket.localPosition = weaponMainLocalPosition + weaponBobLocalPosition + weaponRecoilLocalPosition;
+        }
+
+        // 반동
+        void UpdateWeaponRecoil()
+        {
+            if(weaponRecoilLocalPosition.z >= accumulateRecoil.z * 0.99f)
+            {
+                weaponRecoilLocalPosition = Vector3.Lerp(weaponRecoilLocalPosition, accumulateRecoil, recoilSharpness * Time.deltaTime);
+
+            }
+            else
+            {
+                weaponRecoilLocalPosition = Vector3.Lerp(weaponRecoilLocalPosition, Vector3.zero, recoilRepositionSharpness * Time.deltaTime);
+                accumulateRecoil = weaponRecoilLocalPosition;
+            }
         }
 
         // 카메라 FOV 값 셋팅: 줌인, 줌아웃
@@ -160,10 +231,23 @@ namespace Unity.FPS.Gameplay
             {
                 WeaponController activeWeapon = GetActiveWeapon();
 
-                if (IsAiming)   // 조준시 : 디폴트 -> Aiming 위치로 이동, fov: 디폴트 -> aimZoomRatio
+                if (IsAiming && activeWeapon)   // 조준시 : 디폴트 -> Aiming 위치로 이동, fov: 디폴트 -> aimZoomRatio
                 {
-                    weaponMainLocalPosition = Vector3.Lerp(weaponMainLocalPosition, aimingWeaponPosition.localPosition + activeWeapon.aimOffset,
+                    weaponMainLocalPosition = Vector3.Lerp(weaponMainLocalPosition, aimingWeaponPosition.position + activeWeapon.aimOffset,
                         aimingAnimationSpeed * Time.deltaTime);
+
+                    // 저격 모드 시작
+                    if (isScopeOn)
+                    {
+                        //weaponMainLocalPosition, 목표지점까지의 거리를 구한다
+                        float dist = Vector3.Distance(weaponMainLocalPosition, aimingWeaponPosition.localPosition);
+                        if(dist < distanceOnScope)
+                        {
+                            OnScopedWeapon?.Invoke();
+                            isScopeOn = false;
+                        }
+                    }
+
                     float fov = Mathf.Lerp(playerCharacterController.PlayerCamera.fieldOfView, activeWeapon.aimZoomRatio * defaultFov,
                         aimingAnimationSpeed * Time.deltaTime);
                     SetFov(fov);
@@ -172,8 +256,8 @@ namespace Unity.FPS.Gameplay
                 {
                     weaponMainLocalPosition = Vector3.Lerp(weaponMainLocalPosition, defalutWeaponPosition.localPosition,
                         aimingAnimationSpeed * Time.deltaTime);
-                    float fov = Mathf.Lerp(playerCharacterController.PlayerCamera.fieldOfView, aimingAnimationSpeed * defaultFov,
-                        activeWeapon.aimZoomRatio * Time.deltaTime);
+                    float fov = Mathf.Lerp(playerCharacterController.PlayerCamera.fieldOfView, defaultFov,
+                        aimingAnimationSpeed * Time.deltaTime);
                     SetFov(fov);
                 }
             }
@@ -188,7 +272,8 @@ namespace Unity.FPS.Gameplay
                 // 플레이어가 한 프레임동안 이동한 거리
                 //playerCharacterController.transform.position - lastCharacterPosition
                 // 현재 프레임에서 플레이어 이동 속도
-                Vector3 playerCharacterVelocity = (playerCharacterController.transform.position - lastCharacterPosition) / Time.deltaTime;
+                Vector3 playerCharacterVelocity =
+                    (playerCharacterController.transform.position - lastCharacterPosition) / Time.deltaTime;
 
                 float characterMovementFactor = 0f;
                 if (playerCharacterController.IsGrounded)
@@ -205,9 +290,10 @@ namespace Unity.FPS.Gameplay
                 float frequency = bobFrequency;
                 // 좌우 흔들림
                 float vBobValue = Mathf.Sin(Time.time * frequency) * bobAmount * weaponBobFactor;
+                // 위아래 흔들림 (좌우 흔들림의 절반)
                 float hBobValue = ((Mathf.Sin(Time.time * frequency) * 0.5f) + 0.5f) * bobAmount * weaponBobFactor;
 
-                //
+                // 흔들림 최종 변수에 적용
                 weaponBobLocalPosition.x = hBobValue;
                 weaponBobLocalPosition.y = Mathf.Abs(hBobValue);
 
@@ -411,6 +497,16 @@ namespace Unity.FPS.Gameplay
             {
                 newWeapon.ShowWeapon(true);
             }
+        }
+
+        void OnScope()
+        {
+            weaponCamera.enabled = false;
+        }
+
+        void OffScope()
+        {
+            weaponCamera.enabled = true;
         }
     }
 }
