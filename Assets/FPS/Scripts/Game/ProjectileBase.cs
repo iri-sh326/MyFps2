@@ -20,6 +20,11 @@ namespace Unity.FPS.Game
         public UnityAction OnShoot;                     // 발사시 등록된 함수 호출
         #endregion
 
+        private void Start()
+        {
+            
+        }
+
         public void Shoot(WeaponController controller)
         {
             // 초기화

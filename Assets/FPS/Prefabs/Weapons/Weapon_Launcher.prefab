@@ -165,6 +165,11 @@ MonoBehaviour:
   recoilForce: 0.5
   projectilePrefab: {fileID: 4320066473969714743, guid: 0e23901b938cf4f4eb86850d912715eb,
     type: 3}
+  bulletsPershot: 1
+  bulletSpreadAngle: 0
+  ammoUseOnStartCharge: 1
+  ammoUsegeRateWhileCharging: 1
+  lastChargeTriggerTimeStamp: 0
 --- !u!1 &2990922162098100101
 GameObject:
   m_ObjectHideFlags: 0

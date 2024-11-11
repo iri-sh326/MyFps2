@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 106790115311484949}
   - component: {fileID: 106790115311484954}
   - component: {fileID: 4320066473969714743}
+  - component: {fileID: 903256432560639649}
+  - component: {fileID: 5431540900843398569}
   m_Layer: 0
   m_Name: Projectile_Disc
   m_TagString: Untagged
@@ -97,6 +99,56 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6864946533c8d51489bb8380457e3010, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 30
+  gravityDown: 10
+  root: {fileID: 106790115311484948}
+  tip: {fileID: 106790115311484948}
+  radius: 0.01
+  hittableLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  impactVfxPrefab: {fileID: 4260779743739990948, guid: bbe6bdea7cd168e428a309e9eb2e728b,
+    type: 3}
+  impactVfxLifeTime: 5
+  impactSfxClip: {fileID: 8300000, guid: 0c21228f47ee00d4ea91788c2125b098, type: 3}
+  damage: 20
+--- !u!114 &903256432560639649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 106790115311484953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b079eef5a0373e44d81bbe249bed520a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Damage:
+    Min: 80
+    Max: 350
+  Speed:
+    Min: 20
+    Max: 40
+  GravityDown:
+    Min: 10
+    Max: 3
+  Radius:
+    Min: 0.2
+    Max: 0.2
+--- !u!114 &5431540900843398569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 106790115311484953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c48376dc00e1942b2fd6e8b7a78e86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chargeObject: {fileID: 106790115311484953}
 --- !u!1 &1945832826066038730
 GameObject:
   m_ObjectHideFlags: 0
