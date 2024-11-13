@@ -245,8 +245,8 @@ MonoBehaviour:
   weaponRoot: {fileID: 1505447205160222267}
   switchWeaponSfx: {fileID: 8300000, guid: dfb8f3fc2ff34ab48b9b47b122aa9f66, type: 3}
   shootType: 0
-  maxAmmo: 8
-  delayBetweenShots: 0.5
+  maxAmmo: 2
+  delayBetweenShots: 1
   weaponMuzzle: {fileID: 8334323006752503713}
   muzzleFlashPrefab: {fileID: 748781637555137343, guid: 4f5d4e5eaa0e5104791549cea3dc3f23,
     type: 3}
@@ -266,6 +266,11 @@ MonoBehaviour:
     type: 3}
   bulletsPershot: 24
   bulletSpreadAngle: 7
+  ammoUseOnStartCharge: 1
+  ammoUsegeRateWhileCharging: 1
+  lastChargeTriggerTimeStamp: 0
+  ammoReloadRate: 1
+  ammoReloadDelay: 2
 --- !u!1 &2867801751256125023
 GameObject:
   m_ObjectHideFlags: 0

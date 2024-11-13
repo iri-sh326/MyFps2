@@ -38,6 +38,7 @@ namespace Unity.FPS.Game
     /// <summary>
     /// ratio를 매개변수로 받아 Vector3의 Min에서 Max 사이의 Lerp 값을 반환
     /// </summary>
+    [System.Serializable]
     public struct MinMaxVector3
     {
         public Vector3 Min;

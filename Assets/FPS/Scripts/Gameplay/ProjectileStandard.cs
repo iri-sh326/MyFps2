@@ -39,12 +39,15 @@ namespace Unity.FPS.Gameplay
 
         // 데미지
         public float damage = 20f;
+        private DamageArea damageArea;
         #endregion
 
         private void OnEnable()
         {
             projectileBase = GetComponent<ProjectileBase>();
             projectileBase.OnShoot += OnShoot;
+
+            damageArea = GetComponent<DamageArea>();
 
             Destroy(gameObject, maxLifeTime);
         }
@@ -150,6 +153,19 @@ namespace Unity.FPS.Gameplay
         // Hit 구현, 데미지, Vfx, Sfx, ...etc
         void OnHit(Vector3 point, Vector3 normal, Collider collider)
         {
+            // 데미지
+            if (damageArea)
+            {
+                damageArea.InflictDamageArea(damage, point, hittableLayers, QueryTriggerInteraction.Collide, projectileBase.Owner);
+            }
+            else
+            {
+                Damageable damageable = collider.GetComponent<Damageable>();
+                if (damageable)
+                {
+                    damageable.InflictDamage(damage, false, projectileBase.Owner);
+                }
+            }
 
             // Vfx
             if (impactVfxPrefab)

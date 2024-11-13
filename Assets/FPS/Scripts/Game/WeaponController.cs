@@ -88,6 +88,12 @@ namespace Unity.FPS.Game
         private float maxChargeDuration = 2f;                            // 최대 충전 시간
 
         public float lastChargeTriggerTimeStamp;                         // 충전 시작 시간
+
+        // Reload : 재장전
+        [SerializeField] private float ammoReloadRate = 1f;              // 초당 재장전되는 양
+        [SerializeField] private float ammoReloadDelay = 2f;             // 슛한 다음 ammoReloadDelay가 지난 후에 재장전
+        
+        [SerializeField] private bool automaticReload = true;                             // 자동, 수동 구분
         #endregion
 
         public float CurrentAmmoRatio => currentAmmo / maxAmmo;
@@ -110,6 +116,7 @@ namespace Unity.FPS.Game
         {
             // 충전
             UpdateCharge();
+            UpdateAmmo();
 
             // MuzzleWorldVelocity
             if(Time.deltaTime > 0f)
@@ -118,6 +125,28 @@ namespace Unity.FPS.Game
 
                 lastMuzzlePosition = weaponMuzzle.position;
             }
+        }
+
+        // Reload - Auto
+        void UpdateAmmo()
+        {
+            if (automaticReload && currentAmmo < maxAmmo && IsCharging == false && lastTimeShot + ammoReloadDelay < Time.time)
+            {
+                currentAmmo += ammoReloadRate * Time.deltaTime;         // 초당 ammoReloadRate만큼 재장전
+                currentAmmo = Mathf.Clamp(currentAmmo, 0, maxAmmo);
+            }
+           
+        }
+
+        // Reload - 수동
+        public void Reload()
+        {
+            if(automaticReload || currentAmmo >= maxAmmo || IsCharging)
+            {
+                return;
+            }
+
+            currentAmmo = maxAmmo;
         }
 
         // 충전
@@ -192,7 +221,7 @@ namespace Unity.FPS.Game
                     if (inputUp)
                     {
                         // 충전 끝
-                        TryReleaseCharge();
+                        return TryReleaseCharge();
                     }
                     break;
                 case WeaponShootType.Sniper:
@@ -247,7 +276,6 @@ namespace Unity.FPS.Game
             if(currentAmmo >= 1f && (lastTimeShot + delayBetweenShots) < Time.time)
             {
                 currentAmmo -= 1f;
-                Debug.Log($"currentAmmo: {currentAmmo}");
 
                 HandleShoot();
                 return true;
@@ -264,13 +292,12 @@ namespace Unity.FPS.Game
                 Vector3 shotDirection = GetShotDirectionWithinSpread(weaponMuzzle);
                 ProjectileBase projectileInstance = Instantiate(projectilePrefab, weaponMuzzle.position, Quaternion.LookRotation(shotDirection));
                 projectileInstance.Shoot(this);
-                //Destroy(projectileInstance.gameObject, 3f);
             }
             
             // Vfx
             if (muzzleFlashPrefab)
             {
-                GameObject effectGo = Instantiate(muzzleFlashPrefab, weaponMuzzle.position, weaponMuzzle.rotation);
+                GameObject effectGo = Instantiate(muzzleFlashPrefab, weaponMuzzle.position, weaponMuzzle.rotation, weaponMuzzle);
                 Destroy(effectGo, 2f);
             }
 
