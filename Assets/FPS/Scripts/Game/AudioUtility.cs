@@ -12,7 +12,7 @@ namespace Unity.FPS.Game
     {
         // 지정된 위치에 게임오브젝트를 생성하고 AudioSource 컴포넌트를 추가해서 지정된 클립을 플레이한다
         // 클립 사운드 플레이가 끝나면 자동으로 킬한다 - TimeSelfDestruct 컴포넌트 이용
-        public static void CreateSfx(AudioClip clip, Vector3 position, float spatialBlend, float rolloffDistanceMin)
+        public static void CreateSfx(AudioClip clip, Vector3 position, float spatialBlend, float rolloffDistanceMin = 1f)
         {
             GameObject impactSfxInstance = new GameObject();
             impactSfxInstance.transform.position = position;
