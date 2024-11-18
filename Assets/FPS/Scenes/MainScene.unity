@@ -2150,6 +2150,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1207285330808825698}
   m_PrefabAsset: {fileID: 0}
+--- !u!198 &1207285330808825700 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7635230255058315795, guid: 7593818fba43c7f4c8372299ce5e893f,
+    type: 3}
+  m_PrefabInstance: {fileID: 1207285330808825698}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1242745492160747382
 Transform:
   m_ObjectHideFlags: 0
@@ -2736,6 +2742,12 @@ PrefabInstance:
 --- !u!4 &2339333356056608397 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8492437560918690266, guid: 7593818fba43c7f4c8372299ce5e893f,
+    type: 3}
+  m_PrefabInstance: {fileID: 2339333356056608396}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &2339333356056608398 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7635230255058315795, guid: 7593818fba43c7f4c8372299ce5e893f,
     type: 3}
   m_PrefabInstance: {fileID: 2339333356056608396}
   m_PrefabAsset: {fileID: 0}
@@ -6182,7 +6194,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   deathVfxPrefab: {fileID: 8950624839484268180, guid: 2a8f5052fe50f7b41b17149abb0f7414,
     type: 3}
-  deathVfxSpawnPosition: {fileID: 3698612099631054652}
+  deathVfxSpawnPosition: {fileID: 3632986064014442665}
   damageSfx: {fileID: 8300000, guid: a84fb6d59d7b9e3469519a4e3a864b58, type: 3}
   bodyMaterial: {fileID: 2100000, guid: c3dc5a90c49c99142999f85d6b419d80, type: 2}
   OnHitBodyGradient:
@@ -6216,6 +6228,12 @@ MonoBehaviour:
     m_NumColorKeys: 3
     m_NumAlphaKeys: 2
   flashOnHitDuration: 0.2
+  eyeColorMaterial: {fileID: 2100000, guid: e6fdfd4e017234d43ac116abee8fa90a, type: 2}
+  defaultEyeColor: {r: 44.000168, g: 44.727043, b: 0, a: 1}
+  attackEyeColor: {r: 32, g: 0, b: 0, a: 1}
+  swapToNextWeapon: 0
+  delayAfterWeaponSwap: 0
+  currentWeaponIndex: 0
 --- !u!195 &3233149843916410173
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -6255,7 +6273,16 @@ MonoBehaviour:
   pitchMovementSpeed:
     Min: 0
     Max: 0
-  randomHitSparks: []
+  randomHitSparks:
+  - {fileID: 7783211484382129284}
+  - {fileID: 1207285330808825700}
+  - {fileID: 2339333356056608398}
+  - {fileID: 3452465253107076578}
+  detectedVfxs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  detectedSfx: {fileID: 0}
 --- !u!114 &3233149843916410175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6269,7 +6296,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   affiliation: 0
-  aimPoint: {fileID: 0}
+  aimPoint: {fileID: 5973175687308393569}
 --- !u!114 &3363413185211960582
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6400,6 +6427,12 @@ PrefabInstance:
 --- !u!4 &3452465253107076577 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8492437560918690266, guid: 7593818fba43c7f4c8372299ce5e893f,
+    type: 3}
+  m_PrefabInstance: {fileID: 3452465253107076576}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &3452465253107076578 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7635230255058315795, guid: 7593818fba43c7f4c8372299ce5e893f,
     type: 3}
   m_PrefabInstance: {fileID: 3452465253107076576}
   m_PrefabAsset: {fileID: 0}
@@ -7319,6 +7352,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5149226863477866502}
   - component: {fileID: 3017210459663650308}
+  - component: {fileID: 5149226863477866503}
   m_Layer: 10
   m_Name: Weapon_EyeLazers
   m_TagString: Untagged
@@ -7343,6 +7377,47 @@ Transform:
   - {fileID: 3043950246841234423}
   m_Father: {fileID: 7788642936899195532}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5149226863477866503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5149226863477866501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85d39e9cd1b929d4ba41b53d0ab77606, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponRoot: {fileID: 5580894802093537901}
+  switchWeaponSfx: {fileID: 0}
+  shootType: 0
+  maxAmmo: 8
+  delayBetweenShots: 0.5
+  weaponMuzzle: {fileID: 3043950246841234423}
+  muzzleFlashPrefab: {fileID: 0}
+  shootSfx: {fileID: 8300000, guid: 625c34aa9c141a447b1bd242969e00b6, type: 3}
+  crossHairDefalut:
+    CrossHairSprite: {fileID: 0}
+    CrossHairSize: 0
+    CrossHairColor: {r: 0, g: 0, b: 0, a: 0}
+  crossHairTargetSight:
+    CrossHairSprite: {fileID: 0}
+    CrossHairSize: 0
+    CrossHairColor: {r: 0, g: 0, b: 0, a: 0}
+  aimZoomRatio: 1
+  aimOffset: {x: 0, y: 0, z: 0}
+  recoilForce: 0.5
+  projectilePrefab: {fileID: 2371472729925095732, guid: c9387256d59c80f4f9f66257031ac197,
+    type: 3}
+  bulletsPershot: 1
+  bulletSpreadAngle: 0
+  ammoUseOnStartCharge: 1
+  ammoUsegeRateWhileCharging: 1
+  lastChargeTriggerTimeStamp: 0
+  ammoReloadRate: 1
+  ammoReloadDelay: 2
+  automaticReload: 1
 --- !u!1 &5172578322654715764
 GameObject:
   m_ObjectHideFlags: 0
@@ -7766,6 +7841,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3945222174783312484}
+  - component: {fileID: 7013745492694788482}
   m_Layer: 0
   m_Name: DetectionModule
   m_TagString: Untagged
@@ -7773,6 +7849,23 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &7013745492694788482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7013745492694788481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e836c51387346d4bbb006588f968299, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectionSourcePoint: {fileID: 3698612099631054652}
+  detectionRange: 20
+  sqrDetectionRange: 0
+  knownTargetTimeout: 4
+  attackRange: 20
 --- !u!119 &7093703928785424544
 Projector:
   m_ObjectHideFlags: 0
@@ -7920,6 +8013,12 @@ PrefabInstance:
 --- !u!4 &7783211484382129283 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8492437560918690266, guid: 7593818fba43c7f4c8372299ce5e893f,
+    type: 3}
+  m_PrefabInstance: {fileID: 7783211484382129282}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &7783211484382129284 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7635230255058315795, guid: 7593818fba43c7f4c8372299ce5e893f,
     type: 3}
   m_PrefabInstance: {fileID: 7783211484382129282}
   m_PrefabAsset: {fileID: 0}

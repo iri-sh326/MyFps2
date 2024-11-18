@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.FPS.Game;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Unity.FPS.AI
@@ -35,6 +36,9 @@ namespace Unity.FPS.AI
         // 데미지 - 이펙트
         public ParticleSystem[] randomHitSparks;
 
+        // Detected
+        public ParticleSystem[] detectedVfxs;
+        public AudioClip detectedSfx;
 
         // animation parameter
         const string k_AnimAttackParameter = "Attack";
@@ -42,6 +46,7 @@ namespace Unity.FPS.AI
         const string k_AnimAlertedParameter = "Alerted";
         const string k_AnimOnDamagedParameter = "OnDamaged";
         const string k_AnimDeathParameter = "Death";
+
         #endregion
 
         private void Start()
@@ -79,14 +84,45 @@ namespace Unity.FPS.AI
                     enemyController.SetNavDestination(enemyController.GetDestinationOnPath());
                     break;
                 case AIState.Follow:
+                    enemyController.SetNavDestination(enemyController.knownDetectedTarget.transform.position);
+                    enemyController.OrientToward(enemyController.knownDetectedTarget.transform.position);
+                    enemyController.OrientWeaponsToward(enemyController.knownDetectedTarget.transform.position);
                     break;
                 case AIState.Attack:
+                    enemyController.OrientToward(enemyController.knownDetectedTarget.transform.position);
+                    enemyController.OrientWeaponsToward(enemyController.knownDetectedTarget.transform.position);
+
+                    break;
+            }
+        }
+
+        // 상태 변경에 따른 구현
+        private void UpdateAiStateTransition()
+        {
+            switch (AiState)
+            {
+                case AIState.Patrol:
+                    break;
+                case AIState.Follow:
+                    if (enemyController.IsTargetAttackRange && enemyController.IsTargetAttackRange)
+                    {
+                        AiState = AIState.Attack;
+                        enemyController.SetNavDestination(transform.position);  // 정지
+                    }
+                    break;
+                case AIState.Attack:
+                    if (enemyController.IsTargetAttackRange == false)
+                    {
+                        AiState = AIState.Follow;
+                    }
                     break;
             }
         }
 
         private void OnDamaged()
         {
+
+
             // 스파크 파티클 - 랜덤하게 하나 선택해서 플레이
             if(randomHitSparks.Length > 0)
             {
@@ -96,6 +132,36 @@ namespace Unity.FPS.AI
 
             // 데미지 애니
             animator.SetTrigger(k_AnimOnDamagedParameter);
+        }
+
+        private void OnDetected()
+        {
+            // Vfx
+            for(int i=0; i<detectedVfxs.Length; i++)
+            {
+                detectedVfxs[i].Play();
+            }
+
+            // Sfx
+            if (detectedSfx)
+            {
+                AudioUtility.CreateSfx(detectedSfx, this.transform.position, 1f);
+            }
+
+            // anim
+            animator.SetBool(k_AnimAlertedParameter, true);
+        }
+
+        private void OnLost()
+        {
+            // Vfx
+            for (int i = 0; i < detectedVfxs.Length; i++)
+            {
+                detectedVfxs[i].Stop();
+            }
+
+            // anim
+            animator.SetBool(k_AnimAlertedParameter, false);
         }
         
     }
