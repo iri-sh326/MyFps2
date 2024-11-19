@@ -40,6 +40,10 @@ namespace Unity.FPS.AI
         public ParticleSystem[] detectedVfxs;
         public AudioClip detectedSfx;
 
+        // Attack
+        [Range(0f, 1f)]
+        public float attackSkipDistanceRatio = 0.5f;
+
         // animation parameter
         const string k_AnimAttackParameter = "Attack";
         const string k_AnimMoveSpeedParameter = "MoveSpeed";
@@ -54,6 +58,9 @@ namespace Unity.FPS.AI
             // 참조
             enemyController = GetComponent<EnemyController>();
             enemyController.Damaged += OnDamaged;
+            enemyController.OnDetectedTarget += OnDetected;
+            enemyController.OnLostTarget += OnLost;
+            enemyController.OnAttack += Attacked;
 
             audioSource = GetComponent<AudioSource>();
             audioSource.clip = movementSound;
@@ -89,8 +96,21 @@ namespace Unity.FPS.AI
                     enemyController.OrientWeaponsToward(enemyController.knownDetectedTarget.transform.position);
                     break;
                 case AIState.Attack:
+                    // 일정 거리까지는 이동하면서 공격
+                    float distance = Vector3.Distance(enemyController.knownDetectedTarget.transform.position,
+                        enemyController.DetectionModule.detectionSourcePoint.position);
+                    if(distance >= enemyController.DetectionModule.attackRange * attackSkipDistanceRatio)
+                    {
+                        enemyController.SetNavDestination(enemyController.knownDetectedTarget.transform.position);
+                    }
+                    else
+                    {
+                        enemyController.SetNavDestination(transform.position);  // 제자리에 서기
+                    }
+
                     enemyController.OrientToward(enemyController.knownDetectedTarget.transform.position);
                     enemyController.OrientWeaponsToward(enemyController.knownDetectedTarget.transform.position);
+                    enemyController.TryAttack(enemyController.knownDetectedTarget.transform.position);
 
                     break;
             }
@@ -154,6 +174,12 @@ namespace Unity.FPS.AI
 
         private void OnLost()
         {
+            // 상태 변경
+            if (AiState == AIState.Follow || AiState == AIState.Attack)
+            {
+                AiState = AIState.Patrol;
+            }
+
             // Vfx
             for (int i = 0; i < detectedVfxs.Length; i++)
             {
@@ -162,6 +188,12 @@ namespace Unity.FPS.AI
 
             // anim
             animator.SetBool(k_AnimAlertedParameter, false);
+        }
+
+        private void Attacked()
+        {
+            // 애니
+            //animator
         }
         
     }

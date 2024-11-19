@@ -76,7 +76,9 @@ namespace Unity.FPS.AI
         public UnityAction OnDetectedTarget;
         public UnityAction OnLostTarget;
 
-        //
+        // Attack
+        public UnityAction OnAttack;
+
         private float orientSpeed = 10f;
         public bool IsTargetAttackRange => DetectionModule.IsTargetInAttackRange;
 
@@ -88,11 +90,16 @@ namespace Unity.FPS.AI
         private WeaponController currentWeapon;
         private WeaponController[] weapons;
 
+        // enemyManager
+        private EnemyManager enemyManager;
         #endregion
 
         private void Start()
         {
             // 참조
+            enemyManager = GameObject.FindObjectOfType<EnemyManager>();
+            enemyManager.RegisterEnemy(this);
+
             Agent = GetComponent<NavMeshAgent>();
             actor = GetComponent<Actor>();
             selfColliders = GetComponentsInChildren<Collider>();
@@ -186,6 +193,9 @@ namespace Unity.FPS.AI
 
         private void OnDie()
         {
+            // enemyManager 리스트에서 제거
+            enemyManager.RemoveEnemy(this);
+
             // 폭발 효과
             GameObject effectGo = Instantiate(deathVfxPrefab, deathVfxSpawnPosition.position, Quaternion.identity);
             Destroy(effectGo, 5f);
@@ -355,9 +365,30 @@ namespace Unity.FPS.AI
         }
 
         // 공격
-        public void TryAttack(Vector3 targetPosition)
+        public bool TryAttack(Vector3 targetPosition)
         {
+            // 무기 교체시 딜레이 시간동안 공격 불능
+            if(lastTimeWeaponSwapped + delayAfterWeaponSwap >= Time.time)
+            {
+                return false;
+            }
 
+            // 무기 Shoot
+            bool didFire = GetCurrentWeapon().HandleShootInputs(false, true, false);
+
+            if (didFire)
+            {
+                OnAttack?.Invoke();
+
+                // 발사를 한 번 할 때마다 다음 무기로 교체
+                if(swapToNextWeapon == true && weapons.Length > 1)
+                {
+                    int nextWeaponIndex = (currentWeaponIndex + 1)% weapons.Length;
+                    SetCurrentWeapon(nextWeaponIndex);
+                }
+            }
+
+            return true;
         }
     }
 }
